@@ -16,7 +16,6 @@ Zero_two - 02 бот для discord
 =neko - 2d neko
 =nekoLife - NekoLife хентай ;)
 =h - стэк команд
-----------
 [dztb - v0.0.1] => discord.gg/A4GWdAM
 [Помощь]
 [Яд] => 410018314785030
@@ -29,5 +28,5 @@ Zero_two - 02 бот для discord
 tag => rand, pussy, nekoGif, neko, lesbian, kuni, cumsluts, classic, boobs, bj, anal, yuri, trap, tits, girlSoloGif, girlSolo, smallBoobs, pussyWankGif, pussyArt, kemonomimi, kitsune, keta, holo, holoEro, hentai, futanari, femdom, feetGif, eroFeet, feet, ero, eroKitsune, eroKemonomimi, eroNeko, eroYuri, cumArts, blowJob, pussyGif
 
 # =nekoLife sfw [nekos.life](https://www.npmjs.com/package/nekos.life "nekos.life")
-=nekoLife sfw tag
+=nekoLife sfw tag\n
 tag => smug, baka, tickle, slap, poke, pat, neko, nekoGif, meow, lizard, kiss, hug, foxGirl, feed, cuddle, kemonomimi, holo, woof
