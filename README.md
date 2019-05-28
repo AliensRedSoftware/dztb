@@ -1,5 +1,5 @@
 # dztb - discord zero_two bot
-Discord бот zero_two (nodejs)
+Zero_two - 02 бот для discord
 
 # Библиотеки
 
@@ -12,3 +12,18 @@ Discord бот zero_two (nodejs)
 * ./classes/neko.js
 
 # Функциональность
+
+=neko - 2d neko
+=nekoLife - NekoLife хентай ;)
+=h - стэк команд
+
+# =nekoLife [nekos.life](https://www.npmjs.com/package/nekos.life "nekos.life")
+=nekoLife - nsfw или sfw
+
+# =nekoLife nsfw [nekos.life](https://www.npmjs.com/package/nekos.life "nekos.life")
+=nekoLife nsfw tag
+tag => rand, pussy, nekoGif, neko, lesbian, kuni, cumsluts, classic, boobs, bj, anal, yuri, trap, tits, girlSoloGif, girlSolo, smallBoobs, pussyWankGif, pussyArt, kemonomimi, kitsune, keta, holo, holoEro, hentai, futanari, femdom, feetGif, eroFeet, feet, ero, eroKitsune, eroKemonomimi, eroNeko, eroYuri, cumArts, blowJob, pussyGif
+
+# =nekoLife sfw [nekos.life](https://www.npmjs.com/package/nekos.life "nekos.life")
+=nekoLife sfw tag
+tag => smug, baka, tickle, slap, poke, pat, neko, nekoGif, meow, lizard, kiss, hug, foxGirl, feed, cuddle, kemonomimi, holo, woof
