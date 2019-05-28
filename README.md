@@ -16,6 +16,10 @@ Zero_two - 02 бот для discord
 =neko - 2d neko
 =nekoLife - NekoLife хентай ;)
 =h - стэк команд
+----------
+[dztb - v0.0.1] => discord.gg/A4GWdAM
+[Помощь]
+[Яд] => 410018314785030
 
 # =nekoLife [nekos.life](https://www.npmjs.com/package/nekos.life "nekos.life")
 =nekoLife - nsfw или sfw
