@@ -8,13 +8,13 @@ const random = require('random')
 this.getRandom = function (callback) {
 	    request('https://neko-booru.com/post/view/' + random.int(1,1789), function(error, response, html) {
         var $ = cheerio.load(html)
-        var cards = []
+        var chank = []
         $('.blockbody').each(function() {
-            cards.push({
-                    url : $('img.shm-main-image',this).attr('src')
+        	chank.push({
+                    url : $('img.shm-main-image', this).attr('src')
             })
         })
-        cards.forEach(function(item, i, arr) {
+        chank.forEach(function(item, i, arr) {
             if(item['url'] != null) {
                 callback("https://neko-booru.com" + item['url'])
             }

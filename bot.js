@@ -16,7 +16,7 @@ var options = [channel = null, text = null]
  * Время ожидание выполнение
  */
 function sleep(n) {
-  msleep(n * 1000);
+	msleep(n * 1000);
 }
 
 client.on('message', message => {
@@ -329,7 +329,7 @@ client.on('message', message => {
     			message.channel.sendMessage("=rand - Возвращает рандомное\n=update - Режим обновление\n=freezing - Замарозка (5 сек)")
     		}
     	} else {
-    		message.channel.sendMessage("=neko - 2d neko\n=nekoLife - NekoLife хентай ;)\n=h - стэк команд\n----------0\n[dztb - v0.0.1] => discord.gg/A4GWdAM\n[Помощь]\n[Яд] => 410018314785030")
+    		message.channel.sendMessage("=neko - 2d neko\n=nekoLife - NekoLife хентай ;)\n=h - стэк команд\n----------n[dztb - v0.0.1] => discord.gg/A4GWdAM\n[Помощь]\n[Яд] => 410018314785030")
     	}
 
     }
