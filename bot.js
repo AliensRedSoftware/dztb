@@ -379,7 +379,7 @@ client.on('message', message => {
                 message.channel.sendMessage("twist - Скрутить ссылку")
             }
         } else {
-    		message.channel.sendMessage(prefix + "neko - 2d neko\n" + prefix + "nekoLife - NekoLife хентай ;)\n" + prefix + "clck - Укорачиватель ссылок\n" + prefix + "h - стэк команд\n----------\n[dztb - v0.0.2] => discord.gg/A4GWdAM\n[Помощь]\n[Яд] => 410018314785030")
+    		message.channel.sendMessage(prefix + "neko - 2d neko\n" + prefix + "nekoLife - NekoLife хентай ;)\n" + prefix + "clck - Укорачиватель ссылок\n" + prefix + "h - стэк команд\n----------\n[dztb - v0.0.2] => discord.gg/A4GWdAM\n[Исходный код] => https://github.com/AliensRedSoftware/dztb.git\n[Помощь]\n[Яд] => 410018314785030")
     	}
 
     }
