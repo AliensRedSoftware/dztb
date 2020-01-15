@@ -1,23 +1,27 @@
 const Discord = require('discord.js')
 const msleep = require('msleep')
 const nekosLife = require('nekos.life')
+const threads = require("threads")
 var neko = require("./classes/neko.js")
+var clck = require("./classes/clck.js")
 
 const client = new Discord.Client()
 const nekoClient = new nekosLife();
 
-var prefix = '='
+var prefix = '$'
 
 var rand = false
-var nekoOptions = [rand = false, channel = null, freezing = 5]
+var nekoOptions = [rand = false, channel = null, freezing = 5, startFreezing = 1]
 var options = [channel = null, text = null]
+
 
 /**
  * Время ожидание выполнение
  */
-function sleep(n) {
-	msleep(n * 1000);
-}
+var sleep = async (n, callback) => {
+	msleep(n * 1000)
+    callback(true)
+};
 
 client.on('message', message => {
     options["channel"] = message.channel.name
@@ -25,18 +29,46 @@ client.on('message', message => {
 })
 
 client.on('message', message => {
-    if (nekoOptions['rand'] == true && nekoOptions['channel'] == options['channel']) {
-        sleep(nekoOptions["freezing"]);
-        neko.getRandom(function (data) {
-            message.channel.send({
-                embed: {
-                    description: "https://neko-booru.com ;)",
-                    image: {
-                        url: data
+    var str = options["text"].split(' ')
+    status = str[str.length - 1]
+    waiting = str[str.length - 3]
+    if (nekoOptions['rand'] == true) {
+        if (nekoOptions['channel'] == options['channel']) {
+            if (message.author.id == 396622379901648906) {
+                if (waiting == '[Ожидание]') {
+                    if (status != "[Обработка...]") {
+                        sleep(nekoOptions['startFreezing'], function (data) {
+                            if (data) {
+                                if (nekoOptions['startFreezing'] == nekoOptions['freezing']) {
+                                    neko.getRandom(function (data) {
+                                        nekoOptions['startFreezing'] = 0
+                                        message.channel.sendMessage("[Logger] [neko] [rand] " + "[" + data['count'] + "]" + " [Ожидание] => " + "[Обработка...]")
+                                        message.channel.send({
+                                            embed: {
+                                                description: data['url'],
+                                                image: {
+                                                    url: data['url']
+                                                }
+                                            }
+                                        })
+                                    })
+                                } else {
+                                    neko.getCount(function (data) {
+                                        nekoOptions['startFreezing']++
+                                        message.channel.sendMessage("[Logger] [neko] [rand] " + "[" + data + "]" + " [Ожидание] => " + "[" + nekoOptions['startFreezing'] + "/" + nekoOptions['freezing'] + "]")
+                                    })
+                                }
+                            }
+                       })
+                    } else {
+                        neko.getCount(function (data) {
+                            nekoOptions['startFreezing']++
+                            message.channel.sendMessage("[Logger] [neko] [rand] " + "[" + data + "]" + " [Ожидание] => " + "[" + nekoOptions['startFreezing'] + "/" + nekoOptions['freezing'] + "]")
+                        })
                     }
                 }
-            })
-        })
+            }
+        }
     }
 })
 
@@ -45,7 +77,7 @@ client.on('message', message => {
     if(message.author === client.user) return;
     if (message.content.startsWith(prefix)) {
     	var str = options['text'];
-    	var str1 = str.replace('=', ' ')
+    	var str1 = str.replace(prefix, ' ')
     	var command = str1.split(' ')
     	if (command[1] == 'nekoLife') {
     		if (command[2] == 'nsfw') {
@@ -61,7 +93,7 @@ client.on('message', message => {
     				nekoClient.nsfw.nekoGif().then(response => {
     					message.channel.sendMessage(response['url'])
     				})
-    			} else if (command[3] == 'neko') {
+    			} else if (command[3] == 'neko1') {
     				nekoClient.nsfw.neko().then(response => {
     					message.channel.sendMessage(response['url'])
     				})
@@ -285,16 +317,16 @@ client.on('message', message => {
     				message.channel.sendMessage("smug, baka, tickle, slap, poke, pat, neko, nekoGif, meow, lizard, kiss, hug, foxGirl, feed, cuddle, kemonomimi, holo, woof")
     			}
     		} else {
-    			message.channel.sendMessage("=nekoLife - nsfw или sfw")
+    			message.channel.sendMessage(prefix + "nekoLife - nsfw или sfw")
     		}
     	} else if (command[1] == 'neko') {
     		if (command[2] == 'rand') {
     			neko.getRandom(function (data) {
 		            message.channel.send({
 		                embed: {
-		                    description: "https://neko-booru.com ;)",
+		                    description: data['url'],
 		                    image: {
-		                        url: data
+		                        url: data['url']
 		                    }
 		                }
 		            })
@@ -307,9 +339,15 @@ client.on('message', message => {
 		            nekoOptions['rand'] = true;
 		        }
 		        if (nekoOptions['rand'] == true) {
-		            message.channel.sendMessage("[" + nekoOptions["channel"] + "]" + "[" + nekoOptions["freezing"]  + "сек" + "]" + "Получение => " + "Да )");
+                    if (nekoOptions["freezing"] == null) {
+                        nekoOptions["freezing"] = 5
+                    }
+                    if (nekoOptions["startFreezing"] == null) {
+                        nekoOptions["startFreezing"] = 0
+                    }
+                    message.channel.sendMessage("[Logger] [neko] [rand] " + "[" + 'Неизвестно' + "]" + " [Ожидание] => " + "[Да]")
 		        } else {
-		            message.channel.sendMessage("[" + nekoOptions["channel"] + "]" + "[" + nekoOptions["freezing"]  + "сек" + "]" + "Получение => " + "Нет (");
+		            message.channel.sendMessage("[Logger] [neko] [rand] " + "[" + 'Неизвестно' + "]" + " [Ожидание] => " + "[Нет]")
 		        }
     		} else if (command[2] == 'freezing') {
     			var value = parseInt(command[3]);
@@ -326,13 +364,21 @@ client.on('message', message => {
     				message.channel.sendMessage('Замарозка не может равнятся ничего = (')
     			}
     		} else {
-    			message.channel.sendMessage("=rand - Возвращает рандомное\n=update - Режим обновление\n=freezing - Замарозка (5 сек)")
+    			message.channel.sendMessage(prefix + "rand - Возвращает рандомное\n" + prefix + "update - Режим обновление\n" + prefix + "freezing - Замарозка (5 сек)")
     		}
-    	} else {
-    		message.channel.sendMessage("=neko - 2d neko\n=nekoLife - NekoLife хентай ;)\n=h - стэк команд\n----------n[dztb - v0.0.1] => discord.gg/A4GWdAM\n[Помощь]\n[Яд] => 410018314785030")
+    	} else if (command[1] == 'clck') {
+            if (command[2] == 'twist') {
+                clck.getTwist (command[3], function (r) {
+                    message.channel.sendMessage("[Logger] [clck] [twist] [Успешно] => " + r)
+                })
+            } else {
+                message.channel.sendMessage(prefix + "twist - Скрутить ссылку")
+            }
+        } else {
+    		message.channel.sendMessage(prefix + "neko - 2d neko\n" + prefix + "nekoLife - NekoLife хентай ;)\n" + prefix + "clck - Укорачиватель ссылок\n" + prefix + "h - стэк команд\n----------\n[dztb - v0.0.2] => discord.gg/A4GWdAM\n[Помощь]\n[Яд] => 410018314785030")
     	}
 
     }
 
 })
-client.login('')
+client.login('ваш токен')
