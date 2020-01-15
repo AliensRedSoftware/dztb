@@ -1,7 +1,6 @@
 const Discord = require('discord.js')
 const msleep = require('msleep')
 const nekosLife = require('nekos.life')
-const threads = require("threads")
 var neko = require("./classes/neko.js")
 var clck = require("./classes/clck.js")
 
@@ -37,29 +36,34 @@ client.on('message', message => {
             if (message.author.id == 396622379901648906) {
                 if (waiting == '[Ожидание]') {
                     if (status != "[Обработка...]") {
-                        sleep(nekoOptions['startFreezing'], function (data) {
-                            if (data) {
-                                if (nekoOptions['startFreezing'] == nekoOptions['freezing']) {
-                                    neko.getRandom(function (data) {
-                                        nekoOptions['startFreezing'] = 0
+                        if (status != "[Успешно!!!]") {
+                            if (nekoOptions['startFreezing'] == nekoOptions['freezing']) {
+                                sleep(nekoOptions['startFreezing'], function (data) {
+                                    if (data) {
                                         message.channel.sendMessage("[Logger] [neko] [rand] " + "[" + data['count'] + "]" + " [Ожидание] => " + "[Обработка...]")
-                                        message.channel.send({
-                                            embed: {
-                                                description: data['url'],
-                                                image: {
-                                                    url: data['url']
+                                        neko.getRandom(function (data) {
+                                            message.channel.send({
+                                                embed: {
+                                                    description: data['url'],
+                                                    image: {
+                                                        url: data['url']
+                                                    }
                                                 }
-                                            }
+                                            })
+                                            nekoOptions['startFreezing'] = 0
+                                            message.channel.sendMessage("[Logger] [neko] [rand] " + "[" + data['count'] + "]" + " [Ожидание] => " + "[Успешно!!!]")
                                         })
-                                    })
-                                } else {
-                                    neko.getCount(function (data) {
-                                        nekoOptions['startFreezing']++
-                                        message.channel.sendMessage("[Logger] [neko] [rand] " + "[" + data + "]" + " [Ожидание] => " + "[" + nekoOptions['startFreezing'] + "/" + nekoOptions['freezing'] + "]")
-                                    })
-                                }
+                                    } else {
+                                        message.channel.sendMessage("[Logger] [neko] [rand] " + "[" + data['count'] + "]" + " [Ожидание] => " + "[Ошибка!!!]")
+                                    }
+                                })
+                            } else {
+                                neko.getCount(function (data) {
+                                    nekoOptions['startFreezing']++
+                                    message.channel.sendMessage("[Logger] [neko] [rand] " + "[" + data + "]" + " [Ожидание] => " + "[" + nekoOptions['startFreezing'] + "/" + nekoOptions['freezing'] + "]")
+                                })
                             }
-                       })
+                        }
                     } else {
                         neko.getCount(function (data) {
                             nekoOptions['startFreezing']++
@@ -364,7 +368,7 @@ client.on('message', message => {
     				message.channel.sendMessage('Замарозка не может равнятся ничего = (')
     			}
     		} else {
-    			message.channel.sendMessage(prefix + "rand - Возвращает рандомное\n" + prefix + "update - Режим обновление\n" + prefix + "freezing - Замарозка (5 сек)")
+    			message.channel.sendMessage("rand - Возвращает рандомное\nupdate - Режим обновление\nfreezing - Замарозка (5 сек)")
     		}
     	} else if (command[1] == 'clck') {
             if (command[2] == 'twist') {
@@ -372,7 +376,7 @@ client.on('message', message => {
                     message.channel.sendMessage("[Logger] [clck] [twist] [Успешно] => " + r)
                 })
             } else {
-                message.channel.sendMessage(prefix + "twist - Скрутить ссылку")
+                message.channel.sendMessage("twist - Скрутить ссылку")
             }
         } else {
     		message.channel.sendMessage(prefix + "neko - 2d neko\n" + prefix + "nekoLife - NekoLife хентай ;)\n" + prefix + "clck - Укорачиватель ссылок\n" + prefix + "h - стэк команд\n----------\n[dztb - v0.0.2] => discord.gg/A4GWdAM\n[Помощь]\n[Яд] => 410018314785030")
@@ -381,4 +385,4 @@ client.on('message', message => {
     }
 
 })
-client.login('ваш токен')
+client.login('Ваш токен')
