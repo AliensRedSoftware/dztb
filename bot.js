@@ -1,8 +1,12 @@
+const random = require('random')
+const request = require('request')
 const Discord = require('discord.js')
 const msleep = require('msleep')
 const nekosLife = require('nekos.life')
+var coub = require("./classes/coub.js")
 var neko = require("./classes/neko.js")
 var clck = require("./classes/clck.js")
+var ap = require("./classes/ap.js")
 
 const client = new Discord.Client()
 const nekoClient = new nekosLife();
@@ -13,6 +17,14 @@ var rand = false
 var nekoOptions = [rand = false, channel = null, freezing = 5, startFreezing = 1]
 var options = [channel = null, text = null]
 
+
+const calc = function (arithmetic) {
+    var result = "NaN";
+    try {
+        result = eval(arithmetic.replace(/[^0-9\+\*\-\/\(\)]/g, ""));
+    } catch (e) { }
+    return result || "NaN";
+};
 
 /**
  * Время ожидание выполнение
@@ -373,13 +385,71 @@ client.on('message', message => {
     	} else if (command[1] == 'clck') {
             if (command[2] == 'twist') {
                 clck.getTwist (command[3], function (r) {
-                    message.channel.sendMessage("[Logger] [clck] [twist] [Успешно] => " + r)
+                    if (r != null) {
+                        message.channel.sendMessage("[Logger] [clck] [twist] [Успешно] => " + r)
+                    } else {
+                        message.channel.sendMessage("[Logger] [clck] [twist] [Ожидание] => [Ошибка!!!]")
+                    }
                 })
             } else {
                 message.channel.sendMessage("twist - Скрутить ссылку")
             }
+        } else if (command[1] == 'waifu2x') {
+            message.channel.sendMessage('https://www.thiswaifudoesnotexist.net/example-' + random.int(0, 100000) + '.jpg')
+        } else if (command[1] == 'calc') {
+            message.channel.sendMessage(calc(command[2]))
+        } else if (command[1] == 'coub') {
+            if (command[2] == 'rand') {
+                coub.getRandom(function (video) {
+                    message.channel.sendMessage(video)
+                })
+            } else {
+                message.channel.sendMessage("rand - Возвращает рандомное")
+            }
+        } else if (command[1] == 'ap') {
+            if (command[2] == 'rand') {
+                ap.getRandom(null, function (data) {
+	                message.channel.send({
+	                    embed: {
+	                        description: data,
+	                        image: {
+	                            url: data
+	                        }
+	                    }
+	                })
+                })
+            } else if (command[2] == 'count') {
+                ap.getCountPictures(null, function (count) {
+                    message.channel.sendMessage("[Logger] [ap] [count] [Ожидание] => " + '[' + count + ']')
+                })
+            } else if (command[2] == 'tag') {
+                if (command[3] == 'rand') {
+                    ap.getRandom(command[4], function (data) {
+                        if (data) {
+	                        message.channel.send({
+	                            embed: {
+	                                description: data,
+	                                image: {
+	                                    url: data
+	                                }
+	                            }
+	                        })
+                        } else {
+                            message.channel.sendMessage("[Logger] [ap] [tag] [rand] [Ожидание] => " + '[Ошибка ничего не найдено!]')
+                        }
+                    })
+                } else if (command[3] == 'count') {
+                    ap.getCountPictures(command[4], function (count) {
+                        message.channel.sendMessage("[Logger] [ap] [tag] [count] [Ожидание] => " + '[' + count + ']')
+                    })
+                } else {
+                    message.channel.sendMessage("rand - Возвращает рандомное\ncount - Возвращает кол-во пикч всего\nСовместный тег! => foot||blush")
+                }
+            } else {
+                message.channel.sendMessage("rand - Возвращает рандомное\ncount - Возвращает кол-во пикч всего\ntag - Возвращает с использованием тегом")
+            }
         } else {
-    		message.channel.sendMessage(prefix + "neko - 2d neko\n" + prefix + "nekoLife - NekoLife хентай ;)\n" + prefix + "clck - Укорачиватель ссылок\n" + prefix + "h - стэк команд\n----------\n[dztb - v0.0.2] => discord.gg/A4GWdAM\n[Исходный код] => https://github.com/AliensRedSoftware/dztb.git\n[Помощь]\n[Яд] => 410018314785030")
+    		message.channel.sendMessage(prefix + "coub - коуб видео\n" + prefix + "ap - аниме картинки [https://anime-pictures.net]\n" + prefix + "neko - 2d neko\n" + prefix + "waifu2x - Изоброжение рандомные waifu2x\n" + prefix + "nekoLife - NekoLife хентай ;)\n" + prefix + "clck - Укорачиватель ссылок\n" + prefix + "calc - Калькулятор\n" + prefix + "h - стэк команд\n----------\n[dztb - v0.0.2] => discord.gg/A4GWdAM\n[Исходный код] => https://github.com/AliensRedSoftware/dztb.git\n[Помощь]\n[Яд] => 410018314785030")
     	}
 
     }
