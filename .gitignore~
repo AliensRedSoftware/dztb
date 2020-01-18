@@ -1,7 +1,6 @@
 /node_modules
 
 *.js~
-*.md~
 *.log
 *.pid
 *.tmp
