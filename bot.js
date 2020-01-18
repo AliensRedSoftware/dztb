@@ -340,7 +340,6 @@ client.on('message', message => {
     			neko.getRandom(function (data) {
 		            message.channel.send({
 		                embed: {
-		                    description: data['url'],
 		                    image: {
 		                        url: data['url']
 		                    }
@@ -382,36 +381,154 @@ client.on('message', message => {
     		} else {
     			message.channel.sendMessage("rand - Возвращает рандомное\nupdate - Режим обновление\nfreezing - Замарозка (5 сек)")
     		}
-    	} else if (command[1] == 'clck') {
-            if (command[2] == 'twist') {
-                clck.getTwist (command[3], function (r) {
-                    if (r != null) {
-                        message.channel.sendMessage("[Logger] [clck] [twist] [Успешно] => " + r)
-                    } else {
-                        message.channel.sendMessage("[Logger] [clck] [twist] [Ожидание] => [Ошибка!!!]")
-                    }
-                })
+    	} else if (command[1] == 'util') {
+            if (command[2] == 'clck') {
+                if (command[3] == 'twist') {
+                    clck.getTwist (command[4], function (r) {
+                        if (r != null) {
+                            message.channel.sendMessage("[Logger] [clck] [twist] [Успешно] => " + r)
+                        } else {
+                            message.channel.sendMessage("[Logger] [clck] [twist] [Ожидание] => [Ошибка!!!]")
+                        }
+                    })
+                } else {
+                    message.channel.sendMessage("twist - Скрутить ссылку")
+                }
+            } else if (command[2] == 'calc') {
+                message.channel.sendMessage(calc(command[3]))
             } else {
-                message.channel.sendMessage("twist - Скрутить ссылку")
+                message.channel.sendMessage("clck - Укорачиватель ссылок\ncalc - Калькулятор")
             }
         } else if (command[1] == 'waifu2x') {
             message.channel.sendMessage('https://www.thiswaifudoesnotexist.net/example-' + random.int(0, 100000) + '.jpg')
-        } else if (command[1] == 'calc') {
-            message.channel.sendMessage(calc(command[2]))
         } else if (command[1] == 'coub') {
             if (command[2] == 'rand') {
-                coub.getRandom(function (video) {
-                    message.channel.sendMessage(video)
+                coub.getRandom(function (data) {
+                    try {
+                        message.channel.send({
+                            embed: {
+                                description:
+                                "[Об коубе]\n" +
+                                    '->[Название] => ' + '[' + data['title'] + "]\n" +
+                                    '->[:link:] =>' + '[' + data['link'] + "]\n" +
+                                    '->[:eye:] => ' + '[' + data['views_count'] + "]\n" +
+                                    '->[:heavy_plus_sign:] => ' + '[' + data['likes'] + "]\n" +
+                                    '->[:heavy_minus_sign:] => ' + '[' + data['dislikes'] + "]\n" +
+                                    '->[Оригинал] => ' + '[' + data['original'] + "]\n" +
+                                "[Об файле]\n" +
+                                    '->[Название] => ' + '[' + data['name'] + "]",
+                                files: [data['url']]
+                            }
+                        })
+                    } catch (e) {
+                        message.channel.sendMessage("[Logger] [coub] [tag] [Ожидание] => [Ошибка файл больше 8мб]")
+                    }
                 })
+            } else if (command[2] == 'get') {
+                coub.getCoub(command[3], function (data) {
+                    if (data) {
+                        try {
+                            message.channel.send({
+                                embed: {
+                                    description:
+                                    "[Об коубе]\n" +
+                                        '->[Название] => ' + '[' + data['title'] + "]\n" +
+                                        '->[:link:] =>' + '[' + data['link'] + "]\n" +
+                                        '->[:eye:] => ' + '[' + data['views_count'] + "]\n" +
+                                        '->[:heavy_plus_sign:] => ' + '[' + data['likes'] + "]\n" +
+                                        '->[:heavy_minus_sign:] => ' + '[' + data['dislikes'] + "]\n" +
+                                        '->[Оригинал] => ' + '[' + data['original'] + "]\n" +
+                                    "[Об файле]\n" +
+                                        '->[Название] => ' + '[' + data['name'] + "]",
+                                    files: [data['url']]
+                                }
+                            })
+                        } catch (e) {
+                            message.channel.sendMessage("[Logger] [coub] [Ожидание] => [Ошибка файл больше 8мб]")
+                        }
+                    } else {
+                        message.channel.sendMessage("[Logger] [coub] [Ожидание] => [Ошибка ничего не найдено!]")
+                    }
+                })
+            } else if (command[2] == 'tag') {
+                if (command[3] == 'rand') {
+                    tag = command[4]
+                    period = command[5]
+                    if (coub.is_period(period)) {
+                        coub.getRandomTagPeriod(tag, period, function (data) {
+                            if (data['url']) {
+                                try {
+                                    message.channel.send({
+                                        embed: {
+                                            description:
+                                            "[Об коубе]\n" +
+                                                '->[Название] => ' + '[' + data['title'] + "]\n" +
+                                                '->[:link:] =>' + '[' + data['link'] + "]\n" +
+                                                '->[:eye:] => ' + '[' + data['views_count'] + "]\n" +
+                                                '->[:heavy_plus_sign:] => ' + '[' + data['likes'] + "]\n" +
+                                                '->[:heavy_minus_sign:] => ' + '[' + data['dislikes'] + "]\n" +
+                                                '->[Оригинал] => ' + '[' + data['original'] + "]\n" +
+                                            "[Об файле]\n" +
+                                                '->[Название] => ' + '[' + data['name'] + "]",
+                                            files: [data['url']]
+                                        }
+                                    })
+                                } catch (e) {
+                                    message.channel.sendMessage("[Logger] [coub] [tag] [Ожидание] => [Ошибка файл больше 8мб]")
+                                }
+                            }
+                        })
+                    } else {
+                        if (period) {
+                            message.channel.sendMessage("[Logger] [coub] [tag] [Ожидание] => [Неизвестная опция ->" + period + "]")
+                        }
+                        coub.getRandomTag(tag, function (data) {
+                            if (data['url']) {
+                                try {
+                                    message.channel.send({
+                                        embed: {
+                                            description:
+                                            "[Об коубе]\n" +
+                                                '->[Название] => ' + '[' + data['title'] + "]\n" +
+                                                '->[:link:] =>' + '[' + data['link'] + "]\n" +
+                                                '->[:eye:] => ' + '[' + data['views_count'] + "]\n" +
+                                                '->[:heavy_plus_sign:] => ' + '[' + data['likes'] + "]\n" +
+                                                '->[:heavy_minus_sign:] => ' + '[' + data['dislikes'] + "]\n" +
+                                                '->[Оригинал] => ' + '[' + data['original'] + "]\n" +
+                                            "[Об файле]\n" +
+                                                '->[Название] => ' + '[' + data['name'] + "]",
+                                            files: [data['url']]
+                                        }
+                                    })
+                                } catch (e) {
+                                    message.channel.sendMessage("[Logger] [coub] [tag] [Ожидание] => [Ошибка файл больше 8мб]")
+                                }
+                            } else {
+                                if (!tag) {
+                                    tag = 'Неизвестный'
+                                }
+                                message.channel.sendMessage("[Logger] [coub] [tag] [Ожидание] => [Неизвестный тег ->" + tag + "]")
+                            }
+                        })
+                    }
+                } else if (command[3] == 'opt') {
+                    opt = coub.getPeriod();
+                    message.channel.sendMessage("[Logger] [coub] [tag] [Ожидание] => " + "[" + opt + "]")
+                } else if (command[3] == 'get') {
+                    tags = coub.getTags();
+                    message.channel.sendMessage("[Logger] [coub] [tag] [Ожидание] => " + "[" + tags + "]")
+                } else {
+                    message.channel.sendMessage("[coub]<-[API]->[V2]\nrand - Возвращает рандомное\nopt - Возвращаем ключи\nget - Возвращает все установленные теги")
+                }
             } else {
-                message.channel.sendMessage("rand - Возвращает рандомное")
+                message.channel.sendMessage("[coub]<-[API]->[V2]\nrand - Возвращает рандомное\nget - Возвращаем коуб\ntag - Возвращает с использованием тегом")
             }
         } else if (command[1] == 'ap') {
             if (command[2] == 'rand') {
                 ap.getRandom(null, function (data) {
 	                message.channel.send({
 	                    embed: {
-	                        description: data,
+                            description: data,
 	                        image: {
 	                            url: data
 	                        }
@@ -428,7 +545,7 @@ client.on('message', message => {
                         if (data) {
 	                        message.channel.send({
 	                            embed: {
-	                                description: data,
+                                    description: data,
 	                                image: {
 	                                    url: data
 	                                }
@@ -449,7 +566,7 @@ client.on('message', message => {
                 message.channel.sendMessage("rand - Возвращает рандомное\ncount - Возвращает кол-во пикч всего\ntag - Возвращает с использованием тегом")
             }
         } else {
-    		message.channel.sendMessage(prefix + "coub - коуб видео\n" + prefix + "ap - аниме картинки [https://anime-pictures.net]\n" + prefix + "neko - 2d neko\n" + prefix + "waifu2x - Изоброжение рандомные waifu2x\n" + prefix + "nekoLife - NekoLife хентай ;)\n" + prefix + "clck - Укорачиватель ссылок\n" + prefix + "calc - Калькулятор\n" + prefix + "h - стэк команд\n----------\n[dztb - v0.0.2] => discord.gg/A4GWdAM\n[Исходный код] => https://github.com/AliensRedSoftware/dztb.git\n[Помощь]\n[Яд] => 410018314785030")
+    		message.channel.sendMessage(prefix + "coub - коуб видео\n" + prefix + "ap - аниме картинки [https://anime-pictures.net]\n" + prefix + "neko - 2d neko\n" + prefix + "waifu2x - Изоброжение рандомные waifu2x\n" + prefix + "nekoLife - NekoLife хентай ;)\n"+ prefix + "util - прочее команды\n" + prefix + "h - стэк команд\n----------\n[dztb - v0.0.6] => discord.gg/A4GWdAM\n[Исходный код] => https://github.com/AliensRedSoftware/dztb.git\n[Помощь]\n[Яд] => 410018314785030")
     	}
 
     }

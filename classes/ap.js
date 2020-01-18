@@ -25,17 +25,30 @@ this.getRandom = function (tag, callback) {
  */
 this.getRandomSelected = function (tag, callback) {
     this.getRandomCountPage(tag, function (page) {
-        if (page) {
-            request('https://anime-pictures.net/pictures/view_posts/' + page + '?search_tag=' + tag, function(error, response, html) {
-                const $ = cheerio.load(html)
-                var chank = []
-                $('.img_block_big').each(function() {
-            	    chank.push({
-                         url : 'https://anime-pictures.net' + $('a', this).attr('href')
+        if (page != null) {
+            if (tag) {
+                request('https://anime-pictures.net/pictures/view_posts/' + page + '?search_tag=' + tag, function(error, response, html) {
+                    const $ = cheerio.load(html)
+                    var chank = []
+                    $('.img_block_big').each(function() {
+                	    chank.push({
+                             url : 'https://anime-pictures.net' + $('a', this).attr('href')
+                        })
                     })
+                    callback(chank[random.int(0, chank.length - 1)])
                 })
-                callback(chank[random.int(0, chank.length - 1)])
-            })
+            } else {
+                request('https://anime-pictures.net/pictures/view_posts/' + page, function(error, response, html) {
+                    const $ = cheerio.load(html)
+                    var chank = []
+                    $('.img_block_big').each(function() {
+                	    chank.push({
+                             url : 'https://anime-pictures.net' + $('a', this).attr('href')
+                        })
+                    })
+                    callback(chank[random.int(0, chank.length - 1)])
+                })
+            }
         } else {
             callback(false)
         }
