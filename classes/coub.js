@@ -45,42 +45,62 @@ this.getRandom = function (callback) {
 /**
  * Возвращаем рандомное видео https://coub.com/random
  */
-this.getRandomTagPeriod = function (tag, period, callback) {
-    request('https://coub.com/api/v2/timeline/community/' + tag + '/' + period + '?' + 'page=' + random.int(1, 40) + '&per_page=25', function(error, response, html) {
-        var json = JSON.parse(html);
-        var src = []
-        var output = []
-        json.coubs.forEach(data => {
-            if (data.file_versions.share.default != 'undefined') {
-                if (!data.raw_video_title) {
-                    data.raw_video_title = 'Ничего не найдено'
+this.getRandomTagOpt = function (tag, opt, callback) {
+    var output = ['exception']
+    var time = opt['time']
+    for (var key in opt){
+        if (opt.hasOwnProperty(key)) {
+            if (key == 'time') { //время
+                if (!this.is_time(opt[key])) {
+                    output.push ({
+                        exception: "[Неизвестное значение] => [" + key + "] => [" + opt[key] + "]"
+                    })
                 }
-                src.push({
-                    url : data.file_versions.share.default,
-                    title: data.title,
-                    views_count: data.views_count,
-                    link: 'https://coub.com/view/' + data.permalink,
-                    likes: data.likes_count,
-                    dislikes: data.dislikes_count,
-                    name: data.raw_video_title,
-                    original: data.external_download.url
+            } else {
+                output.push ({
+                    exception: "[Неизвестное опций] => [" + key + "] => [" + opt[key] + "]"
                 })
             }
-        })
-        selected = random.int(0, src.length - 1)
-        output['url'] = src[selected]['url']
-        output['title'] = src[selected]['title']
-        output['views_count'] = src[selected]['views_count']
-        output['link'] = src[selected]['link']
-        output['likes'] = src[selected]['likes']
-        output['dislikes'] = src[selected]['dislikes']
-        output['name'] = src[selected]['name']
-        output['original'] = src[selected]['original']
-        if (output['original'] == null) {
-            output['original'] = 'Ничего не найдено'
         }
+    }
+    if (this.is_time(time)) {
+        request('https://coub.com/api/v2/timeline/community/' + tag + '/' + time + '?' + 'page=' + random.int(1, 40) + '&per_page=25', function(error, response, html) {
+            var json = JSON.parse(html);
+            var src = []
+            json.coubs.forEach(data => {
+                if (data.file_versions.share.default != 'undefined') {
+                    if (!data.raw_video_title) {
+                        data.raw_video_title = 'Ничего не найдено'
+                    }
+                    src.push({
+                        url : data.file_versions.share.default,
+                        title: data.title,
+                        views_count: data.views_count,
+                        link: 'https://coub.com/view/' + data.permalink,
+                        likes: data.likes_count,
+                        dislikes: data.dislikes_count,
+                        name: data.raw_video_title,
+                        original: data.external_download.url
+                    })
+                }
+            })
+            selected = random.int(0, src.length - 1)
+            output['url'] = src[selected]['url']
+            output['title'] = src[selected]['title']
+            output['views_count'] = src[selected]['views_count']
+            output['link'] = src[selected]['link']
+            output['likes'] = src[selected]['likes']
+            output['dislikes'] = src[selected]['dislikes']
+            output['name'] = src[selected]['name']
+            output['original'] = src[selected]['original']
+            if (output['original'] == null) {
+                output['original'] = 'Ничего не найдено'
+            }
+            callback(output)
+        })
+    } else {
         callback(output)
-    })
+    }
 }
 
 /**
@@ -195,15 +215,17 @@ this.getTags = function () {
             "[17] => nsfw\n"
 }
 
-
 /**
  * Возвращаем лист с периоды https://coub.com/random
  */
-this.getPeriod = function () {
-    return "\n[1] [Горячее] => daily\n" +
+this.getOpt = function () {
+    return  "\n" +
+            "[time]" +
+            "\n" +
+            "[1] [Горячее] => daily\n" +
             "[2] [В тренде] => rising\n" +
             "[3] [Свежие] => fresh\n" +
-            "[4] [Свежие] => half\n" +
+            "[4] [Половина] => half\n" +
             "[5] [Квартал] => quarter\n" +
             "[6] [Месяц] => monthly\n" +
             "[7] [Неделя] => weekly\n" +
@@ -256,22 +278,22 @@ this.is_tag = function (tag) {
 /**
  * Возвращаем проверку период
  */
-this.is_period = function (period) {
-    if (period == 'daily') { //Горячее
+this.is_time = function (time) {
+    if (time == 'daily') { //Горячее
         return true
-    } else if (period == 'rising') { //В тренде
+    } else if (time == 'rising') { //В тренде
         return true
-    } else if (period == 'fresh') { //Свежее
+    } else if (time == 'fresh') { //Свежее
         return true
-    } else if (period == 'half') { //Полгода
+    } else if (time == 'half') { //Полгода
         return true
-    } else if (period == 'quarter') { //Квартал
+    } else if (time == 'quarter') { //Квартал
         return true
-    } else if (period == 'monthly') { //Месяц
+    } else if (time == 'monthly') { //Месяц
         return true
-    } else if (period == 'weekly') { //Неделя
+    } else if (time == 'weekly') { //Неделя
         return true
-    } else if (period == 'daily') { //День
+    } else if (time == 'daily') { //День
         return true
     } else {
         return false
