@@ -1,3 +1,4 @@
+global.clearOpt = [remove = false, id = false, count = 0]
 
 /**
  * Возврщает установлен ли сигнал ;)
@@ -12,7 +13,6 @@ this.getIsInstalled = function (selected, active) {
         }
     }
 }
-
 
 /**
  * Возвращает цвет сигнала
@@ -65,3 +65,58 @@ this.getIsStatus  = function (botid, active, tm, spamStatus, channel) {
         }
     }
 }
+
+/**
+ * Очистка всех сообщение в конфе
+ */
+this.clear = function (message, messages) { //580786297342394415
+    /*messages.forEach(function(msg) {
+        const user = {
+            color: 0xcc9193,
+            author: {
+	            name: '[Ник] => ' + message.author.username + "\n" +
+                '[Сообщение] => ' + message.content + "\n" +
+                '[🔥] => ' + '[' + global.clearOpt['count'] + ']',
+	            icon_url: message.author.avatarURL
+            }
+        };
+    })*/
+
+    if (messages.code == 50034) { // Ошибка удалять сообщение нельзя больше 14 дней
+        const user = {
+            color: 0xcc9193,
+            author: {
+	            name: '[Ник] => ' + message.author.username + "\n" +
+                '[Сообщение] => ' + message.content + "\n" +
+                '[🔥] => ' + '[' + 0 + ']',
+	            icon_url: message.author.avatarURL
+            }
+        };
+        message.channel.send("[🛡️]-[📩]-[Очистка] => [Ошибка удалять сообщение нельзя больше 14 дней] ", { embed: user })
+        global.clearOpt['remove'] = false
+        global.clearOpt['count'] = 0
+    } else {
+        if (!global.clearOpt['count']) {
+            global.clearOpt['count'] = messages.size
+        } else {
+            global.clearOpt['count'] = global.clearOpt['count'] + messages.size
+        }
+        const user = {
+            color: 0xcc9193,
+            author: {
+	            name: '[Ник] => ' + message.author.username + "\n" +
+                '[Сообщение] => ' + message.content + "\n" +
+                '[🔥] => ' + '[' + global.clearOpt['count'] + ']',
+	            icon_url: message.author.avatarURL
+            }
+        };
+        if (messages.size != 1) {
+            message.channel.send("[🛡️]-[📩]-[Очистка] => [" + messages.size + " постов успешно] ", { embed: user })
+        } else {
+            message.channel.send("[🛡️]-[📩]-[Очистка] => [Закончено] ", { embed: user })
+            global.clearOpt['remove'] = false
+            global.clearOpt['count'] = 0
+        }
+    }
+}
+

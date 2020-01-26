@@ -22,10 +22,10 @@ var spamStatus = false
 var tm = []
 var active = []
 
+
 var rand = false
 var nekoOptions = [rand = false, channel = null, freezing = 5, startFreezing = 1]
 var options = [channel = null, text = null]
-
 
 const calc = function (arithmetic) {
     var result = "NaN";
@@ -53,6 +53,21 @@ var sleep = async (n, callback) => {
     callback(true)
 };
 
+//670709313114734602
+//580861397219672065
+//21
+
+/**
+ * Очистка спама
+ */
+client.on('message', message => {
+    if (global.clearOpt['remove']) {
+        message.channel.bulkDelete(100)
+          .then(messages => spam.clear(message, messages))
+          .catch(error => spam.clear(message, error));
+    }
+})
+
 /**
  * Возвращает готовую опцию ;)
  */
@@ -61,7 +76,6 @@ getOpt = function (command, offset) {
         command.shift()
     }
     if (command[0]) {
-        console.log(command)
         var text = ''
         command.forEach(function (data) { // key=val
             text += data
@@ -89,6 +103,7 @@ client.on('message', message => {
     options["text"] = message.content
 })
 
+
 /**
  * sec - защита
  */
@@ -104,54 +119,61 @@ client.on('message', message => {
                 if (!active[message.author.id]) {
                     tm[message.author.id] = currentHour + ":" + currentMin + ":" + currentSecond
                     active[message.author.id] = maxShans //Попыток
-                    message.channel.sendMessage(message.author + "\n" + "[security] => [spam] [Сигнал] = [Установлен]")
+                    message.channel.sendMessage(message.author + "\n" + "[🛡️]-[📩]-[Сигнал] = [✔️]")
                 } else {
-                    for (var id in active){
-                        if (active.hasOwnProperty(id)) {
-                            if (message.author.id == id) {
-                                Hour = tm[id].split(':')[0]
-                                Min = tm[id].split(':')[1]
-                                Second = tm[id].split(':')[2]
-                                //Разница
-                                Hour = currentHour - Hour
-                                Min = currentMin - Min
-                                Second = currentSecond - Second
-                                previwTime = Hour + ":" + Min + ":" + Second
-                                //console.log("Прошлое =>" + Hour + ":" + Min + ":" + Second)
-                                tm[message.author.id] = currentHour + ":" + currentMin + ":" + currentSecond
-                                if (Math.sign(Hour) == -1) {
-                                    Hour = 0
-                                }
-                                if (Math.sign(Min) == -1) {
-                                    Min = 0
-                                }
-                                if (Math.sign(Second) == -1) {
-                                    Second = freezing
-                                }
-                                if (Hour == 0) {
-                                    if (Min == 0) {
-                                        if (Second >= freezing) {
-                                            //Успешное отслежка
-                                        } else {
-                                            if (id == message.author.id) {
-                                                active[message.author.id] = active[message.author.id] - 1
-                                                if (active[message.author.id] == 0) {
-                                                    let muterole = message.guild.roles.find(role => role.name === "Мут");
-                                                    message.member.addRole(muterole);
-                                                    message.channel.sendMessage(message.author + "\n" + "[security] => [spam] [" + message.author + "] " + "=> [Добавлена новая роль Мут]")
-                                                } else {
-                                                    message.channel.sendMessage(message.author + "\n" + "[security] => [spam] [" + message.author + "] " + "=> [Осталось попыток " +  active[id] + " из " + maxShans + "]")
+                    if (active[message.author.id] == 'muted') {
+                        let muterole = message.guild.roles.find(role => role.name === "Мут");
+                        message.member.addRole(muterole);
+                        message.channel.sendMessage(message.author + "\n" + "[🛡️]-[📩] [" + message.author + "] " + "=> [Добавлена новая роль Мут]")
+                    } else {
+                        for (var id in active) {
+                            if (active.hasOwnProperty(id)) {
+                                if (message.author.id == id) {
+                                    Hour = tm[id].split(':')[0]
+                                    Min = tm[id].split(':')[1]
+                                    Second = tm[id].split(':')[2]
+                                    //Разница
+                                    Hour = currentHour - Hour
+                                    Min = currentMin - Min
+                                    Second = currentSecond - Second
+                                    previwTime = Hour + ":" + Min + ":" + Second
+                                    //console.log("Прошлое =>" + Hour + ":" + Min + ":" + Second)
+                                    tm[message.author.id] = currentHour + ":" + currentMin + ":" + currentSecond
+                                    if (Math.sign(Hour) == -1) {
+                                        Hour = 0
+                                    }
+                                    if (Math.sign(Min) == -1) {
+                                        Min = 0
+                                    }
+                                    if (Math.sign(Second) == -1) {
+                                        Second = freezing
+                                    }
+                                    if (Hour == 0) {
+                                        if (Min == 0) {
+                                            if (Second >= freezing) {
+                                                //Успешное отслежка
+                                            } else {
+                                                if (id == message.author.id) {
+                                                    active[message.author.id] = active[message.author.id] - 1
+                                                    if (active[message.author.id] == 0) {
+                                                        active[message.author.id] = 'muted'
+                                                        let muterole = message.guild.roles.find(role => role.name === "Мут");
+                                                        message.member.addRole(muterole);
+                                                        message.channel.sendMessage(message.author + "\n" + "[🛡️]-[📩] [" + message.author + "] " + "=> [Добавлена новая роль Мут]")
+                                                    } else {
+                                                        message.channel.sendMessage(message.author + "\n" + "[🛡️]-[📩] [" + message.author + "] " + "=> [Осталось попыток " +  active[id] + " из " + maxShans + "]")
+                                                    }
                                                 }
+                                                message.channel.sendMessage(message.author + "\n" + "[🛡️]-[📩] [" + message.author + "] [" + previwTime + "]" + "=> [Оу оу Обнаружен ввод текста на красный сигнал] => [" + Second + ' из ' + freezing + "Сек]")
                                             }
-                                            message.channel.sendMessage(message.author + "\n" + "[security] => [spam] [" + message.author + "] [" + previwTime + "]" + "=> [Оу оу Обнаружен ввод текста на красный сигнал] => [" + Second + ' из ' + freezing + "Сек]")
+                                        } else {
+                                            //Успешное отслежка
+                                            //message.channel.sendMessage(message.author + "\n" + "[security] => [spam] [" + message.author + "] " + "=> [Оу оу слишком быстрый текст не превышайте скорость остановки] => [" + Min + ' из ' + MinFreezing + "Сек]")
                                         }
                                     } else {
                                         //Успешное отслежка
-                                        //message.channel.sendMessage(message.author + "\n" + "[security] => [spam] [" + message.author + "] " + "=> [Оу оу слишком быстрый текст не превышайте скорость остановки] => [" + Min + ' из ' + MinFreezing + "Сек]")
+                                        //message.channel.sendMessage(message.author + "\n" + "[security] => [spam] [" + message.author + "] " + "=> Постить нельзя была Меньше " + Hour + "мин")
                                     }
-                                } else {
-                                    //Успешное отслежка
-                                    //message.channel.sendMessage(message.author + "\n" + "[security] => [spam] [" + message.author + "] " + "=> Постить нельзя была Меньше " + Hour + "мин")
                                 }
                             }
                         }
@@ -216,6 +238,17 @@ client.on('message', message => {
 client.on('message', message => {
     if(message.author === client.user) return;
     if (message.content.startsWith(prefix)) {
+        const user = {
+	        color: 0xcc9193,
+	        author: {
+		        name: '[Ник] => ' + message.author.username + "\n" +
+                '[Команда] => ' + options['text'],
+		        icon_url: message.author.avatarURL
+	        }
+        };
+        message.delete()
+          .then()
+          .catch(console.error);
     	var str = options['text'];
     	var str1 = str.replace(prefix, ' ')
     	var command = str1.split(' ')
@@ -223,241 +256,241 @@ client.on('message', message => {
     		if (command[2] == 'nsfw') {
     			if (command[3] == 'rand') {
     				nekoClient.nsfw.randomHentaiGif().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'pussy') {
     				nekoClient.nsfw.pussy().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'nekoGif') {
     				nekoClient.nsfw.nekoGif().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'neko1') {
     				nekoClient.nsfw.neko().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'lesbian') {
     				nekoClient.nsfw.lesbian().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'kuni') {
     				nekoClient.nsfw.kuni().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    				    message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'cumsluts') {
     				nekoClient.nsfw.cumsluts().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'classic') {
     				nekoClient.nsfw.classic().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'boobs') {
     				nekoClient.nsfw.boobs().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'bj') {
     				nekoClient.nsfw.bJ().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'anal') {
     				nekoClient.nsfw.anal().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'avatar') {
     				nekoClient.nsfw.avatar().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'yuri') {
     				nekoClient.nsfw.yuri().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'trap') {
     				nekoClient.nsfw.trap().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'tits') {
     				nekoClient.nsfw.tits().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'girlSoloGif') {
     				nekoClient.nsfw.girlSoloGif().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'girlSolo') {
     				nekoClient.nsfw.girlSolo().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'smallBoobs') {
     				nekoClient.nsfw.smallBoobs().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'pussyWankGif') {
     				nekoClient.nsfw.pussyWankGif().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'pussyArt') {
     				nekoClient.nsfw.pussyArt().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'kemonomimi') {
     				nekoClient.nsfw.kemonomimi().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'kitsune') {
     				nekoClient.nsfw.kitsune().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'keta') {
     				nekoClient.nsfw.keta().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'holo') {
     				nekoClient.nsfw.holo().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'holoEro') {
     				nekoClient.nsfw.holoEro().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'hentai') {
     				nekoClient.nsfw.hentai().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'futanari') {
     				nekoClient.nsfw.futanari().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'femdom') {
     				nekoClient.nsfw.femdom().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'feetGif') {
     				nekoClient.nsfw.feetGif().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'eroFeet') {
     				nekoClient.nsfw.eroFeet().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'feet') {
     				nekoClient.nsfw.feet().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'ero') {
     				nekoClient.nsfw.ero().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'eroKitsune') {
     				nekoClient.nsfw.eroKitsune().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'eroKemonomimi') {
     				nekoClient.nsfw.eroKemonomimi().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'eroNeko') {
     				nekoClient.nsfw.eroNeko().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'eroYuri') {
     				nekoClient.nsfw.eroYuri().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'cumArts') {
     				nekoClient.nsfw.cumArts().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'blowJob') {
     				nekoClient.nsfw.blowJob().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'pussyGif') {
     				nekoClient.nsfw.pussyGif().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else {
-    				message.channel.sendMessage(message.author + "\n" + "rand, pussy, nekoGif, neko, lesbian, kuni, cumsluts, classic, boobs, bj, anal, yuri, trap, tits, girlSoloGif, girlSolo, smallBoobs, pussyWankGif, pussyArt, kemonomimi, kitsune, keta, holo, holoEro, hentai, futanari, femdom, feetGif, eroFeet, feet, ero, eroKitsune, eroKemonomimi, eroNeko, eroYuri, cumArts, blowJob, pussyGif")
+    				message.channel.send("rand, pussy, nekoGif, neko, lesbian, kuni, cumsluts, classic, boobs, bj, anal, yuri, trap, tits, girlSoloGif, girlSolo, smallBoobs, pussyWankGif, pussyArt, kemonomimi, kitsune, keta, holo, holoEro, hentai, futanari, femdom, feetGif, eroFeet, feet, ero, eroKitsune, eroKemonomimi, eroNeko, eroYuri, cumArts, blowJob, pussyGif", { embed: user })
     			}
     		} else if (command[2] == 'sfw') {
     			if (command[3] == 'smug') {
     				nekoClient.sfw.smug().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'baka') {
     				nekoClient.sfw.baka().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'tickle') {
     				nekoClient.sfw.tickle().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'slap') {
     				nekoClient.sfw.slap().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'poke') {
     				nekoClient.sfw.poke().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'pat') {
     				nekoClient.sfw.pat().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'neko') {
     				nekoClient.sfw.neko().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'nekoGif') {
     				nekoClient.sfw.nekoGif().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'meow') {
     				nekoClient.sfw.meow().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'lizard') {
     				nekoClient.sfw.lizard().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'kiss') {
     				nekoClient.sfw.kiss().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'hug') {
     				nekoClient.sfw.hug().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'foxGirl') {
     				nekoClient.sfw.foxGirl().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'feed') {
     				nekoClient.sfw.feed().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'cuddle') {
     				nekoClient.sfw.cuddle().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'kemonomimi') {
     				nekoClient.sfw.kemonomimi().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'holo') {
     				nekoClient.sfw.holo().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else if (command[3] == 'woof') {
     				nekoClient.sfw.woof().then(response => {
-    					message.channel.sendMessage(message.author + "\n" + response['url'])
+    					message.channel.send(response['url'])
     				})
     			} else {
-    				message.channel.sendMessage(message.author + "\n" + "smug, baka, tickle, slap, poke, pat, neko, nekoGif, meow, lizard, kiss, hug, foxGirl, feed, cuddle, kemonomimi, holo, woof")
+    				message.channel.send("smug, baka, tickle, slap, poke, pat, neko, nekoGif, meow, lizard, kiss, hug, foxGirl, feed, cuddle, kemonomimi, holo, woof", { embed: user })
     			}
     		} else {
-    			message.channel.sendMessage(message.author + "\n" + prefix + "nekoLife - nsfw или sfw")
+    			message.channel.send(prefix + "nekoLife - nsfw или sfw", { embed: user })
     		}
     	} else if (command[1] == 'neko') {
     		if (command[2] == 'rand') {
@@ -484,9 +517,9 @@ client.on('message', message => {
                     if (nekoOptions["startFreezing"] == null) {
                         nekoOptions["startFreezing"] = 0
                     }
-                    message.channel.sendMessage(message.author + "\n" + "[Logger] [neko] [rand] " + "[" + 'Неизвестно' + "]" + " [Ожидание] => " + "[Да]")
+                    message.channel.send("[Logger] [neko] [rand] " + "[" + 'Неизвестно' + "]" + " [Ожидание] => " + "[Да]", { embed: user })
 		        } else {
-		            message.channel.sendMessage(message.author + "\n" + "[Logger] [neko] [rand] " + "[" + 'Неизвестно' + "]" + " [Ожидание] => " + "[Нет]")
+		            message.channel.send("[Logger] [neko] [rand] " + "[" + 'Неизвестно' + "]" + " [Ожидание] => " + "[Нет]", { embed: user })
 		        }
     		} else if (command[2] == 'freezing') {
     			var value = parseInt(command[3]);
@@ -602,29 +635,28 @@ client.on('message', message => {
                                 }
                             })
                         } else {
-                            message.channel.sendMessage(message.author + "\n" + "usd-rub - из usd в rub")
+                            message.channel.send("usd-rub - из usd в rub", { embed: user })
                         }
                     } else {
-                        message.channel.sendMessage(message.author + "\n" + "usd-rub - из usd в rub")
+                        message.channel.send("usd-rub - из usd в rub", { embed: user })
                     }
                 } else {
-                    message.channel.sendMessage(message.author + "\n" + "usd-rub - из usd в rub")
+                    message.channel.send("usd-rub - из usd в rub", { embed: user })
                 }
             } else {
-                message.channel.sendMessage(message.author + "\n" + "img - Вход в картинки" + "\n" + "clck - Укорачиватель ссылок\ncalc - Калькулятор\ncnv - Конвертировать валюту\nisUrl - Возвращает ссылка это или нет")
+                message.channel.send("img - Вход в картинки" + "\n" + "clck - Укорачиватель ссылок\ncalc - Калькулятор\ncnv - Конвертировать валюту\nisUrl - Возвращает ссылка это или нет", { embed: user })
             }
         } else if (command[1] == 'waifu2x') {
-            message.channel.sendMessage(message.author + "\n" + 'https://www.thiswaifudoesnotexist.net/example-' + random.int(0, 100000) + '.jpg')
+            message.channel.send('https://www.thiswaifudoesnotexist.net/example-' + random.int(0, 100000) + '.jpg', { embed: user })
         } else if (command[1] == 'isUrl') {
             var url = validURL(command[2])
-            message.channel.sendMessage(message.author + "\n" + "[Logger] [url] [Валидность] [Ожидание] => " + "[" + url + "]")
+            message.channel.send("[Logger] [url] [Валидность] [Ожидание] => " + "[" + url + "]", { embed: user })
         } else if (command[1] == 'coub') {
             if (command[2] == 'rand') {
                 coub.getRandom(function (data) {
                     message.channel.send({
                         embed: {
                             description:
-                            message.author + "\n" +
                             "[Об коубе]\n" +
                                 '->[Название] => ' + '[' + data['title'] + "]\n" +
                                 '->[:link:] =>' + '[' + data['link'] + "]\n" +
@@ -644,7 +676,6 @@ client.on('message', message => {
                         message.channel.send({
                             embed: {
                                 description:
-                                message.author + "\n" +
                                 "[Об коубе]\n" +
                                     '->[Название] => ' + '[' + data['title'] + "]\n" +
                                     '->[:link:] =>' + '[' + data['link'] + "]\n" +
@@ -658,7 +689,7 @@ client.on('message', message => {
                             }
                         })
                     } else {
-                        message.channel.sendMessage(message.author + "\n" + "[Logger] [coub] [Ожидание] => [Ошибка ничего не найдено!]")
+                        message.channel.send("[Logger] [coub] [Ожидание] => [Ошибка ничего не найдено!]", { embed: user })
                     }
                 })
             } else if (command[2] == 'tag') {
@@ -670,14 +701,13 @@ client.on('message', message => {
                         coub.getRandomTagOpt(tag, opt, function (data) {
                             data.forEach(function (dop) {
                                 if (dop['exception']) {
-                                    message.channel.sendMessage(message.author + "\n" + "[Logger] [coub] [tag] [Ожидание] => " + dop['exception'])
+                                    message.channel.send("[Logger] [coub] [tag] [Ожидание] => " + dop['exception'], { embed: user })
                                 }
                             })
                             if (data['url']) {
                                 message.channel.send({
                                     embed: {
                                         description:
-                                        message.author + "\n" +
                                         "[Об коубе]\n" +
                                             '->[Название] => ' + '[' + data['title'] + "]\n" +
                                             '->[:link:] =>' + '[' + data['link'] + "]\n" +
@@ -691,7 +721,7 @@ client.on('message', message => {
                                     }
                                 })
                             } else {
-                                message.channel.sendMessage(message.author + "\n" + "[Logger] [coub] [tag] [Ожидание] => [Ошибка ничего не найдено!]")
+                                message.channel.send("[Logger] [coub] [tag] [Ожидание] => [Ошибка ничего не найдено!]", { embed: user })
                             }
                         })
                     } else {
@@ -700,7 +730,6 @@ client.on('message', message => {
                                 message.channel.send({
                                     embed: {
                                         description:
-                                        message.author + "\n" +
                                         "[Об коубе]\n" +
                                             '->[Название] => ' + '[' + data['title'] + "]\n" +
                                             '->[:link:] =>' + '[' + data['link'] + "]\n" +
@@ -717,30 +746,30 @@ client.on('message', message => {
                                 if (!tag) {
                                     tag = 'Неизвестный'
                                 }
-                                message.channel.sendMessage(message.author + "\n" + "[Logger] [coub] [tag] [Ожидание] => [Неизвестный тег ->" + tag + "]")
+                                message.channel.send("[Logger] [coub] [tag] [Ожидание] => [Неизвестный тег ->" + tag + "]", { embed: user })
                             }
                         })
                     }
                 } else if (command[3] == 'opt') {
                     opt = coub.getOpt();
-                    message.channel.sendMessage(message.author + "\n" + "[Logger] [coub] [tag] [Ожидание] => " + "[" + opt + "]")
+                    message.channel.send("[Logger] [coub] [tag] [Ожидание] => " + "[" + opt + "]", { embed: user })
                 } else if (command[3] == 'get') {
                     tags = coub.getTags();
-                    message.channel.sendMessage(message.author + "\n" + "[Logger] [coub] [tag] [Ожидание] => " + "[" + tags + "]")
+                    message.channel.send("[Logger] [coub] [tag] [Ожидание] => " + "[" + tags + "]", { embed: user })
                 } else {
-                    message.channel.sendMessage(message.author + "\n" + "[coub]<-[API]->[V2]\nrand - Возвращает рандомное\nopt - Возвращаем ключи\nget - Возвращает все установленные теги")
+                    message.channel.send("[coub]<-[API]->[V2]\nrand - Возвращает рандомное\nopt - Возвращаем ключи\nget - Возвращает все установленные теги", { embed: user })
                 }
             } else {
-                message.channel.sendMessage(message.author + "\n" + "[coub]<-[API]->[V2]\nrand - Возвращает рандомное\nget - Возвращаем коуб\ntag - Возвращает с использованием тегом")
+                message.channel.send("[coub]<-[API]->[V2]\nrand - Возвращает рандомное\nget - Возвращаем коуб\ntag - Возвращает с использованием тегом", { embed: user })
             }
         } else if (command[1] == 'ver') {
-            message.channel.sendMessage(message.author + "\n" + "[discord zero_two bot] [ver] [Ожидание] => " + '[' + version + ']')
+            message.channel.send("[discord zero_two bot] [ver] [Ожидание] => " + '[' + version + ']', { embed: user });
         } else if (command[1] == 'euqinu$') {
             if (command[2] == 'isURL') {
                 if (message.author.id == 287992996669161472) {
                     global.patau = command[3]
                 } else {
-                    message.channel.sendMessage("](: апутсод тен[" + " >= ]еинадижо[ ]euqinu[ ]reggol[" + "\n" + message.author)
+                    message.channel.send("](: апутсод тен[" + " >= ]еинадижо[ ]euqinu[ ]reggol[" + "\n" + message.author)
                 }
             }
         } else if (command[1] == 'sec') {
@@ -748,34 +777,72 @@ client.on('message', message => {
                 if (command[3] == 'on') {
                     if (message.author.id == 287992996669161472) {
                         spamStatus = true
-                        message.channel.sendMessage(message.author + "\n" + "[security] => [spam] => [установка] => " + "[Включено]")
+                        message.channel.send("[🛡️]-[📩]-[Установка] => " + "[✔️]", { embed: user })
                     } else {
-                            message.channel.sendMessage(message.author + "\n" + "[security] => [spam] => [установка] => " + "[У вас нету прав на использование этой команды]")
-                        }
+                        message.channel.send("[🛡️]-[📩]-[Установка] => " + "[У вас нету прав на использование этой команды :(]", { embed: user })
+                    }
                 } else if (command[3] == 'off') {
                     if (message.author.id == 287992996669161472) {
                         spamStatus = false
-                        message.channel.sendMessage(message.author + "\n" + "[security] => [spam] => [установка] => " + "[Выключено]")
+                        message.channel.send("[🛡️]-[📩]-[Установка] => " + "[🔴]", { embed: user })
                     } else {
-                        message.channel.sendMessage(message.author + "\n" + "[security] => [spam] => [установка] => " + "[У вас нету прав на использование этой команды]")
+                        message.channel.send("[🛡️]-[📩]-[Установка] => " + "[У вас нету прав на использование этой команды]", { embed: user })
                     }
                 } else if (command[3] == 'isStatus') {
                     if (spam.getIsStatus(message.author.id, active, tm, spamStatus, options["channel"])) {
-                        message.channel.sendMessage(message.author + "\n" + "[security] => [spam] => [Сигнал] [Цвет] = " + "[Зеленный]")
+                        message.channel.send("[🛡️]-[📩]-[Статус] = " + "[🟢]", { embed: user })
                     } else {
-                        message.channel.sendMessage(message.author + "\n" + "[security] => [spam] => [Сигнал] [Цвет] = " + "[Красный]")
+                        message.channel.send("[🛡️]-[📩]-[Статус] = " + "[🔴]", { embed: user })
+                    }
+                } else if (command[3] == 'clear') {
+                    if (message.author.id == 287992996669161472) {
+                        if (global.clearOpt['remove']) {
+                            global.clearOpt['remove'] = false
+                            message.channel.send("[🛡️]-[📩]-[Очистка] => " + "[❌]", { embed: user })
+                        } else {
+                            global.clearOpt['remove'] = true
+                            message.channel.send("[🛡️]-[📩]-[Очистка] => " + "[✔️]", { embed: user })
+                        }
+                    } else {
+                        message.channel.send("[🛡️]-[📩]-[Очистка] => " + "[У вас нету прав на использование этой команды :(]", { embed: user })
                     }
                 } else if (command[3] == 'isInstalled') {
                     if (spam.getIsInstalled(message.author.id, active)) {
-                        message.channel.sendMessage(message.author + "\n" + "[security] => [spam] => [Сигнал] => " + "[Установлен]")
+                        message.channel.send("[🛡️]-[📩]-[Статус] => " + "[✔️]", { embed: user })
                     } else {
-                        message.channel.sendMessage(message.author + "\n" + "[security] => [spam] => [Сигнал] => " + "[Не установлен]")
+                        message.channel.send("[🛡️]-[📩]-[Статус] => " + "[❌]", { embed: user })
                     }
                 } else {
-                    message.channel.sendMessage(message.author + "\n" + "[security] => [spam]\non - Включить\noff - Выключить\nisStatus - Возвращает цвет сигнала\nisInstalled - Возврщает установлен ли сигнал")
+                    message.channel.send("[🛡️]-[📩]\non - Включить\noff - Выключить\nisStatus - Возвращает цвет сигнала\nisInstalled - Возврщает установлен ли сигнал", { embed: user })
                 }
             } else {
-                message.channel.sendMessage(message.author + "\n" + "[security] => [V1.0.0 alpha]\nspam - Возвращает опцию спама")
+                message.channel.send("[🛡️] => [V1.0.1]\nspam [📩] - Возвращает опцию спама", { embed: user })
+            }
+        } else if (command[1] == 's2s5') { // Слим спейс
+            if (command[2] == 'send') {
+                
+            } else if (command[2] == 'getThreads') {
+                
+            } else {
+                message.channel.send("[s2s5]=>[CAPI]=>[V1]\nsend - Отправить сообщение\ngetThreads - Возвращает все нити", { embed: user })
+            }
+        } else if (command[1] == 'Telegram') { // Телеграмм
+            if (command[2] == 'send') {
+                
+            } else {
+                message.channel.send("[Telegram]=>[API]=>[V7]\nsend - Отправить сообщение", { embed: user })
+            }
+        } else if (command[1] == 'vk') { // Вк
+            if (command[2] == 'send') {
+                
+            } else {
+                message.channel.send("[vk]=>[API]=>[Выбранный]\nsend - Отправить сообщение", { embed: user })
+            }
+        } else if (command[1] == 'discord') { // Дискорд
+            if (command[2] == 'create') {
+                
+            } else {
+                message.channel.send("[discord]=>[API]=>[V7]\ncreate - Возвращает созданный аккаунт", { embed: user })
             }
         } else if (command[1] == 'ap') {
             if (command[2] == 'rand') {
@@ -791,7 +858,7 @@ client.on('message', message => {
                 })
             } else if (command[2] == 'count') {
                 ap.getCountPictures(null, function (count) {
-                    message.channel.sendMessage(message.author + "\n" + "[Logger] [ap] [count] [Ожидание] => " + '[' + count + ']')
+                    message.channel.send("[Logger] [ap] [count] [Ожидание] => " + '[' + count + ']', { embed: user })
                 })
             } else if (command[2] == 'tag') {
                 if (command[3] == 'rand') {
@@ -806,21 +873,21 @@ client.on('message', message => {
 	                            }
 	                        })
                         } else {
-                            message.channel.sendMessage(message.author + "\n" + "[Logger] [ap] [tag] [rand] [Ожидание] => " + '[Ошибка ничего не найдено!]')
+                            message.channel.send("[Logger] [ap] [tag] [rand] [Ожидание] => " + '[Ошибка ничего не найдено!]', { embed: user })
                         }
                     })
                 } else if (command[3] == 'count') {
                     ap.getCountPictures(command[4], function (count) {
-                        message.channel.sendMessage(message.author + "\n" + "[Logger] [ap] [tag] [count] [Ожидание] => " + '[' + count + ']')
+                        message.channel.send("[Logger] [ap] [tag] [count] [Ожидание] => " + '[' + count + ']', { embed: user })
                     })
                 } else {
-                    message.channel.sendMessage(message.author + "\n" + "rand - Возвращает рандомное\ncount - Возвращает кол-во пикч всего\nСовместный тег! => foot||blush")
+                    message.channel.send("rand - Возвращает рандомное\ncount - Возвращает кол-во пикч всего\nСовместный тег! => foot||blush", { embed: user })
                 }
             } else {
-                message.channel.sendMessage(message.author + "\n" + "rand - Возвращает рандомное\ncount - Возвращает кол-во пикч всего\ntag - Возвращает с использованием тегом")
+                message.channel.send("rand - Возвращает рандомное\ncount - Возвращает кол-во пикч всего\ntag - Возвращает с использованием тегом", { embed: user })
             }
         } else {
-    		message.channel.sendMessage(message.author + "\n" + prefix + "discord - api дискорда" + "\n" + prefix + "coub - коуб видео\n" + prefix + "ap - аниме картинки [https://anime-pictures.net]\n" + prefix + "neko - 2d neko\n" + prefix + "waifu2x - Изоброжение рандомные waifu2x\n" + prefix + "nekoLife - NekoLife хентай ;)\n" + prefix + "sec - Защита\n" + prefix + "util - прочее команды\n" + prefix + "ver - Версия\n" + "ыднамок еыньлакину - euqinu" + prefix + "\n" + prefix + "h - стэк команд\n----------\n[dztb - v" + version + "] => discord.gg/uq57gQg\n[Исходный код] => https://github.com/AliensRedSoftware/dztb.git\n[Помощь]\n[Яд] => 410018314785030")
+    		message.channel.send(prefix + "Telegram - api телеграмм" + "\n" + prefix + "vk - api вк" + "\n" + prefix + "s2s5 - capi слим спейс" + "\n" + prefix + "discord - api дискорда" + "\n" + prefix + "coub - коуб видео\n" + prefix + "ap - аниме картинки [https://anime-pictures.net]\n" + prefix + "neko - 2d neko\n" + prefix + "waifu2x - Изоброжение рандомные waifu2x\n" + prefix + "nekoLife - NekoLife хентай ;)\n" + prefix + "sec - Защита\n" + prefix + "util - прочее команды\n" + prefix + "ver - Версия\n" + "ыднамок еыньлакину - euqinu" + prefix + "\n" + prefix + "h - стэк команд\n----------\n[dztb - v" + version + "] => discord.gg/uq57gQg\n[Исходный код] => https://github.com/AliensRedSoftware/dztb.git\n[Помощь]\n[Яд] => 410018314785030", { embed: user })
     	}
 
     }
